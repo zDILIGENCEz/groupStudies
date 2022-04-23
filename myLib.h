@@ -8,4 +8,8 @@
 #include <iostream>
 
 using namespace std;
-static string getHelloString(string name);
+namespace myLib
+{
+    // Returns greating string
+    static string getHelloString(string name);
+}

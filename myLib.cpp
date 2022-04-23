@@ -6,15 +6,15 @@
 //
 
 #include "myLib.h"
-#include <iostream>
 
-using namespace std;
-
-string getHelloString(string name)
+namespace myLib
 {
-    string begining = "Hello, ";
-    string end = ". Glad to hear you";
-    
-    string greatingsString = begining + name + end;
-    return greatingsString;
+    string getHelloString(string name)
+    {
+        string begining = "Hello, ";
+        string end = ". Glad to hear you";
+        
+        string greatingsString = begining + name + end;
+        return greatingsString;
+    }
 }
