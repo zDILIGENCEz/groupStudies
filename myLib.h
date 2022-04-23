@@ -8,12 +8,4 @@
 #include <iostream>
 
 using namespace std;
-namespace myLib
-{
-    class Greatings
-    {
-    public:
-        // Returns greating string
-        static string getHelloString(string name);
-    };
-}
+static string getHelloString(string name);
