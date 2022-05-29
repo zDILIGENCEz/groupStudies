@@ -6,10 +6,13 @@
 //
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 namespace myLib
 {
     // Returns greating string
     static string getHelloString(string name);
+
+    static vector<int> getOptimalPath(string file, int startPointID, int endPointID);
 }
