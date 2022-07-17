@@ -88,12 +88,6 @@ namespace myLib
         // -------------------------------------------------------------------------
         
         //find the min path
-        printf("\nWeight for nodes  ----  ");
-        for(int i = 0; i < nodeCount; i++) {
-            printf("%.3f ", weightArray[i]);
-        }
-        printf("\n");
-        
         currentPointID = endPointID;
         vector<int> pathArray;
         while(currentPointID != startPointID) {
@@ -135,7 +129,7 @@ namespace myLib
         return sqrt(pow((secondPoint.first - firstPoint.first), 2) + pow((secondPoint.second - firstPoint.second), 2));
     }
     
-    vector<vector<double>> getMapMatrix(int nodeCount, vector<vector<double>> matrix, string mapFileName) {
+    pair<pair<vector<vector<double>>, vector<int>>, vector<pair<double, double>>> getMapMatrix(int nodeCount, vector<vector<double>> matrix, string mapFileName) {
         pair<double, double> cordsArray[nodeCount];
         ifstream mapFile(mapFileName);
         
@@ -145,12 +139,14 @@ namespace myLib
         
         int temp;
         vector<int> arrayOfConnections[nodeCount];
+        vector<int> arrayOfId;
         
         for(int i = 0; i < nodeCount; i++) {
             mapFile >> id;
             mapFile >> latitude;
             mapFile >> longetude;
             cordsArray[i] = pair(latitude, longetude);
+            arrayOfId.push_back(id);
             
             while (!mapFile.eof()) {
                 if (mapFile.peek() == '\n') {
@@ -163,45 +159,69 @@ namespace myLib
         
         for(int i = 0; i < nodeCount; i++) {
             for(int j = 0; j < arrayOfConnections[i].size(); j++) {
-                double a = getLenght(cordsArray[i], cordsArray[arrayOfConnections[i][j]]);
-                matrix[i][arrayOfConnections[i][j]] = a;
+                int cordId;
+                for(int k = 0; k < nodeCount; k++) {
+                    if (arrayOfId[k] == arrayOfConnections[i][j]) {
+                        cordId = k;
+                    }
+                }
+                double lenght = getLenght(cordsArray[i], cordsArray[cordId]);
+                matrix[i][cordId] = lenght;
             }
         }
         
-        return matrix;
+        vector<pair<double, double>> arrayOfCoordinates;
+        for(int i = 0; i < nodeCount; i++) {
+            arrayOfCoordinates.push_back(cordsArray[i]);
+        }
+        
+        return pair(pair(matrix, arrayOfId), arrayOfCoordinates);
     }
 
-    vector<int> getOptimalPath(string file, int  startPointId) {
+    vector<pair<double, double>> getOptimalPath(string file, int  startPointId, int endPointId) {
         ifstream ifs;
         ifs.open(file);
         
         vector<int> minPath;
-
+        vector<int> arrayOfId;
+        vector<pair<double, double>> arrayOfCords;
+        int nodeCount = getNodeCount(file);
+    
         if(ifs.is_open()) {
             cout << "File was opened\n";
-            int nodeCount = getNodeCount(file);
-            
+
             vector<vector<double>> matrix(nodeCount, vector<double>(nodeCount, 0));
             
-            matrix = getMapMatrix(nodeCount, matrix, file);
+            pair<pair<vector<vector<double>>, vector<int>>, vector<pair<double, double>>> result = getMapMatrix(nodeCount, matrix, file);
             
-            for(int i = 0; i < nodeCount; i++) {
-                for(int j = 0; j < nodeCount; j++) {
-                    printf("%.0f ", matrix[i][j]);
+            matrix = result.first.first;
+            arrayOfId = result.first.second;
+            arrayOfCords = result.second;
+            
+            int startPoint;
+            int endPoint;
+            
+            for(int k = 0; k < nodeCount; k++) {
+                if (arrayOfId[k] == startPointId) {
+                    startPoint = k;
+                } else if (arrayOfId[k] == endPointId) {
+                    endPoint = k;
                 }
-                printf("\n");
             }
             
-            minPath = optimalPath(nodeCount, matrix, 0, 36);
-            
-            
+            minPath = optimalPath(nodeCount, matrix, startPoint, endPoint);
         } else {
             cerr <<"Could not open: " << file << endl;
             exit(1);
         }
+    
+        vector<pair<double, double>> optimalCords;
+        for(int i = 0; i < minPath.size(); i++) {
+            optimalCords.push_back(pair(arrayOfCords[minPath[i]].first, arrayOfCords[minPath[i]].second));
+        }
 
         ifs.close();
-        return minPath;
+        return optimalCords;
     }
         
 // -------------------------------------------------------------------------------
